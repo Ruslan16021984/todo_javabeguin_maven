@@ -3,6 +3,8 @@ package com.gmail.carbit3333333.todo.controller;
 import com.gmail.carbit3333333.todo.entity.Category;
 import com.gmail.carbit3333333.todo.entity.Priority;
 import com.gmail.carbit3333333.todo.repository.PriorityRepository;
+import com.gmail.carbit3333333.todo.search.CategorySearchValues;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,11 +22,9 @@ public class ProrityController {
         this.repository = repository;
     }
 
-    @GetMapping("/test")
-    public List<Priority> test(){
-        List<Priority> priorityList = repository.findAll();
-        System.out.println(priorityList.toString());
-        return priorityList;
+    @GetMapping("/all")
+    public List<Priority> findAll(){
+        return repository.findAllByOrderByIdAsc();
     }
     @PostMapping("/add")
     public ResponseEntity<Priority> add(@RequestBody Priority priority){
@@ -62,5 +62,20 @@ public class ProrityController {
             return new ResponseEntity("id=" + id +"not found ", HttpStatus.NOT_ACCEPTABLE);
         }
         return ResponseEntity.ok(priority);
+    }
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Priority>deleteByid(@PathVariable Long id){
+        try {
+            repository.deleteById(id);
+        }catch (EmptyResultDataAccessException e){
+            e.printStackTrace();
+            return new ResponseEntity("id=" +id+" not found ", HttpStatus.NOT_ACCEPTABLE);
+        }
+        return new ResponseEntity(HttpStatus.OK);
+    }
+    @PostMapping("/search")
+    public ResponseEntity<List<Priority>>search(@RequestBody CategorySearchValues categorySearchValues){
+        System.out.println(categorySearchValues.getText());
+        return ResponseEntity.ok(repository.findByTitle(categorySearchValues.getText()));
     }
 }
